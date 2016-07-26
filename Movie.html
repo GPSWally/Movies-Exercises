@@ -2,24 +2,55 @@
 <html>
 <head>
 	<title></title>
-		<script   src="http://code.jquery.com/jquery-3.1.0.js"   integrity="sha256-slogkvB1K3VOkzAI8QITxV3VzpOnkeNVsKvtkYLMjfk="   crossorigin="anonymous"></script>
+	<script   src="http://code.jquery.com/jquery-3.1.0.js"   integrity="sha256-slogkvB1K3VOkzAI8QITxV3VzpOnkeNVsKvtkYLMjfk="   crossorigin="anonymous"></script>
+	<style>
+	.text {
+		font-size: 25px;
+		font-style: bold;
+	.myResults {
+		background: cornflowerblue;
+	}
+	}
+
+	</style>
 </head>
 <body>
+	<div>
+		<p>Your competitor, MovieCo, has an open API which allows you to see their last 10,000 rentals. In order to get a competitive advantage, your job is to write some code to analyze that data and spot trends.</p>
+		<p>The API is available at two endpoints:</p>
+		<p>* http://159.203.175.239:8080/movies.txt</p>
+		<p>Contains all of the movies in the format: ID Title (Year)</p>
+		<p>Example:  111 Good Will Hunting (1997)  -->(The movie "Good Will Hunting" from 1997 has id 111)</p>
+		<p>* http://159.203.175.239:8080/checkouts.txt</p>
+		<p>Contains the last 12 months of checkouts in the format</p>
+		<p>userID Month MovieID</p>
+		<p>Example:  user95 jun 83  --> (The user #95 checked out movie #83 in June)</p>
+		<p>Each record in checkouts.txt records one instance of one movie being checked out by one user.</p>
+		<p>Your job is to write code to answer the following questions:</p>
+		<p>1. What user(s) had the most checkouts?</p>
+		<p>2. What month(s) had the most checkouts?</p>
+		<p>3. What is the title of the movie(s) that was the most checked out?</p>
+<p></p>
+<p></p>
+	</div>
+	<div>
+	<table class="myResults">
+		<tr><td><div class="text">The user with the max number of checkout is in the last 12 months is: User <span id="Max User"></span></div></td></tr>
+		<p></p>
+		<tr><td><div class="text">The month with the most checkouts in the last 12 months is: <span id="Checkouts Months"></span></div></td></tr>
+		<p></p>
+		<tr><td><div class="text">The Movie with the most checkouts in the last 12 months is: <span id="Max Checkouts"></span></div></td></tr>
+	</table>
+	</div>
 
 	<script>
 
-		var movieData = "#IMDB TOP 250/n#http://www.imdb.com/chart/top/n1 The Shawshank Redemption (1994)/n2 The Godfather (1972)/n3 The Godfather: Part II (1974)/n4 The Dark Knight (2008)/n5 Schindler's List (1993)/n6 12 Angry Men (1957)/n7 Pulp Fiction (1994)/n8 The Lord of the Rings: The Return of the King (2003)/n9 The Good, the Bad and the Ugly (1966)/n10 Fight Club (1999)/n11 The Lord of the Rings: The Fellowship of the Ring (2001)/n12 Star Wars: Episode V - The Empire Strikes Back (1980)/n13 Forrest Gump (1994)/n14 Inception (2010)/n15 The Lord of the Rings: The Two Towers (2002)/n16 One Flew Over the Cuckoo's Nest (1975)/n17 Goodfellas (1990)/n18 The Matrix (1999)/n19 Seven Samurai (1954)/n20 Star Wars: Episode IV - A New Hope (1977)/n21 City of God (2002)/n22 Se7en (1995)/n23 The Silence of the Lambs (1991)/n24 It's a Wonderful Life (1946)/n25 The Usual Suspects (1995)/n";
-
-		var rawUserData = 'user18 feb 46/nuser68 dec 220/nuser61 nov 43/nuser83 oct 144/nuser11 dec 159/nuser22 oct 187/nuser45 nov 174/nuser95 jun 83/nuser61 may 193/nuser67 dec 7/nuser74 apr 24/nuser6 nov 145/nuser55 may 37/nuser18 sep 92/nuser54 jan 16/nuser69 jul 77/nuser1 dec 6/nuser63 dec 99/nuser13 apr 195/nuser55 jan 235/nuser85 oct 188/nuser6 aug 215/nuser83 jan 49/nuser78 apr 48/nuser10 feb 23/nuser57 mar 215/nuser97 sep 173/nuser91 mar 128/nuser33 aug 111/nuser65 jul 158/nuser37 jun 114/nuser9 mar 45/nuser47 apr 203/nuser79 feb 93/nuser92 aug 61/nuser74 dec 39/nuser85 jul 149/nuser37 jan 58/nuser45 apr 76/nuser26 aug 110';
-
-		var userCOarr = [];
-
 		function movieInfoParse(movieInfo){
-			var movieInfoArr = movieInfo.split('/n');
+			var movieInfoArr = movieInfo.split('\n');
 			var movieArr = [];
 			for (var i in movieInfoArr){
+				var movieObject = {MovieIndex:"", Title:""};
 				if (i != 0 && i != 1){ 
-					var movieObject = {MovieIndex:"", Title:""};
 					//movieObject.Index = movieInfoArr[i].substr(0,movieInfoArr[i].indexOf(' '));
 					//movieObject.Title = movieInfoArr[i].substr(movieInfoArr[i].indexOf(' ')+1);
 					movieObject.MovieIndex = movieInfoArr[i].slice(0,movieInfoArr[i].indexOf(' '));
@@ -27,46 +58,157 @@
 				}
 				movieArr.push(movieObject);
 			}
-			console.log(movieArr);
+			return movieArr;
 		}
 
 		function userDataInfo(UserData){
-			var userInfoArr = UserData.split('/n');
+			var userInfoArr = UserData.split('\n');
 			var userArr = [];
+			var userCOarr = [];
+			var sample = [];
 
 			for (var j in userInfoArr){
-				var userObject = {UserID:"", Month:"", MovieIndex:""};
+				var userObject = {UserID:undefined, Month:"", MovieIndex:""};
 				userObject.UserID = userInfoArr[j].slice(4,userInfoArr[j].indexOf(' '));
 				userObject.Month = userInfoArr[j].slice(userInfoArr[j].indexOf(' ')+1,userInfoArr[j].indexOf(' ')+4);
 				userObject.MovieIndex = userInfoArr[j].slice(userInfoArr[j].indexOf(' ')+5);
 				userArr.push(userObject);
-				userCO(userObject);
+				//userCo(userObject);
 				//monthCO(userObject);
 				//titleCO(userObject);
 			}
-			console.log(userArr);
+
+			return userArr;
+			//console.log("sample " +userCO);
 		}
 
-		function userCO(cOuser){
-			if (userCOarr[parseInt(cOuser.UserID)] == undefined){
-				userCOarr[parseInt(cOuser.UserID)] = 1;
-			} else {
-			userCOarr[parseInt(cOuser.UserID)] += 1; 
+			function userCo(userInfo){
+				var userCheckout = [];
+				var monthlyCOuts = [0,0,0,0,0,0,0,0,0,0,0,0,0];
+				var titleCheckout = [];
+				var sumUserData= {}
+				for (var i in userInfo){
+					//User checkout info
+					if (userCheckout[parseInt(userInfo[i].UserID)] === undefined) {
+						userCheckout[parseInt(userInfo[i].UserID)] = 1;
+					}else {
+						userCheckout[parseInt(userInfo[i].UserID)] += 1;
+					}
+
+					//Title checkouts info
+					if (titleCheckout[parseInt(userInfo[i].MovieIndex)] === undefined) {
+						titleCheckout[parseInt(userInfo[i].MovieIndex)] = 1;
+					}else {
+						titleCheckout[parseInt(userInfo[i].MovieIndex)] += 1;
+					}
+
+					//Title checkouts info
+					if (userInfo[i].Month == 'jan') {
+						monthlyCOuts[1] += 1;
+					}else if (userInfo[i].Month == 'feb') {
+						monthlyCOuts[2] += 1;
+					}else if (userInfo[i].Month == 'mar') {
+						monthlyCOuts[3] += 1;
+					}else if (userInfo[i].Month == 'apr') {
+						monthlyCOuts[4] += 1;
+					}else if (userInfo[i].Month == 'may') {
+						monthlyCOuts[5] += 1;
+					}else if (userInfo[i].Month == 'jun') {
+						monthlyCOuts[6] += 1;
+					}else if (userInfo[i].Month == 'jul') {
+						monthlyCOuts[7] += 1;
+					}else if (userInfo[i].Month == 'aug') {
+						monthlyCOuts[8] += 1;
+					}else if (userInfo[i].Month == 'sep') {
+						monthlyCOuts[9] += 1;
+					}else if (userInfo[i].Month == 'oct') {
+						monthlyCOuts[10] += 1;
+					}else if (userInfo[i].Month == 'nov') {
+						monthlyCOuts[11] += 1;
+					}else if (userInfo[i].Month == 'dec') {
+						monthlyCOuts[12] += 1;
+					}else {monthlyCOuts[0] += 1;
+					}
+				}
+				//make call to max array values
+				//;
+				var maxUser = maxArrValue(userCheckout);
+				var maxTitle = maxArrValue(titleCheckout); 
+				var maxMonth = maxArrValue(monthlyCOuts);
+
+				console.log ("userCheckout" + userCheckout);
+				console.log("maxUser " + maxUser);
+				document.getElementById("Max User").innerHTML = maxUser;
+
+				console.log ("titleCheckout" + titleCheckout);
+				console.log("maxTitle " + maxTitle);
+
+				console.log ("monthlyCOuts" + monthlyCOuts);
+				var mMonth;
+				if (maxMonth = 1){mMonth = 'January'};
+				if (maxMonth = 2){mMonth = 'February'};
+				if (maxMonth = 3){mMonth = 'March'};
+				if (maxMonth = 4){mMonth = 'April'};
+				if (maxMonth = 5){mMonth = 'May'};
+				if (maxMonth = 6){mMonth = 'June'};
+				if (maxMonth = 7){mMonth = 'July'};
+				if (maxMonth = 8){mMonth = 'August'};
+				if (maxMonth = 9){mMonth = 'September'};
+				if (maxMonth = 10){mMonth = 'October'};
+				if (maxMonth = 11){mMonth = 'November'};
+				if (maxMonth = 12){mMonth = 'December'};
+				
+				console.log("maxMonth " + maxMonth);
+				document.getElementById("Checkouts Months").innerHTML = mMonth;
+				return maxTitle;
 			}
-		}
-			//if $.inArray(value, array) //jquery function
-/*
-		function monthCO(cOmonth){
 
-		}
+			function maxArrValue (myArr){
+				var maxValue = 0;
+				var maxIndexs = [0];  //equal 0 and the zero position
+				for (i = 0; i<myArr.length; i++){
+					if (myArr[i] == maxValue) {
+						maxIndexs.push(i);
+					}
+					if (myArr[i]> maxValue){
+						maxIndexs = [i];
+						maxValue = myArr[i];
+					} 
+				}
+				return maxIndexs;
+			} 
 
-		function titleCO(cOtitle){
+		$.get("http://159.203.175.239:8080/checkouts.txt", function(response){
+			var uDparsed = userDataInfo(response);
+			var uC_Max = userCo(uDparsed);
+			$.get("http://159.203.175.239:8080/movies.txt", function(response){
+				var movieSum = movieInfoParse(response);
+				var maxTitle = 'No Title';
+				for (var i in movieSum){
+					if (parseInt(movieSum[i].MovieIndex) == uC_Max){
+						maxTitle = movieSum[i].Title;
+					}
+				}
+				console.log (maxTitle);
+				titleQuotes = '"'+maxTitle+'"';
+				document.getElementById("Max Checkouts").innerHTML = titleQuotes;
+			});
+			
+		});
 
-		}
-*/
-		console.log(userCOarr);
-		movieInfoParse(movieData);
-		userDataInfo(rawUserData)
+
+//		$.get("http://159.203.175.239:8080/movies.txt", function(response){
+//			var mDparsed = movieInfoParse(response);
+//			console.log(mDparsed);
+//		}); 
+		//var mDparsed = movieInfoParse(movieData);
+		//var uDparsed = userDataInfo(rawUserData);
+		//var uC_Max = userCo(uDparsed);
+
+
+		//console.log(mDparsed);
+		//console.log(uDparsed);
+		//document.getElementById("User Data").innerHTML = m;
 
 
 	</script>
